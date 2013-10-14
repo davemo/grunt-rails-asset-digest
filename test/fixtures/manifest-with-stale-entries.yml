@@ -1,0 +1,8 @@
+---
+some/assetpipeline/generated-tree.js: some/assetpipeline/generated-tree-536a9e5ddkfjc9v9e9r939494949491.js
+another/tree-we-didnt-touch.js: another/entry-we-didnt-touch-536a9e5d711e0593e43360ad330ccc31.js
+rootfile.js: rootfile-stale.js
+sourcemapping.js.map: sourcemapping-stale.js.map
+othersubdirectory/generated-tree.js: othersubdirectory/generated-tree-stale.js
+subdirectory/with/alibrary.js: subdirectory/with/alibrary-stale.js
+style.css: style-stale.css
