@@ -1,5 +1,8 @@
 # grunt-rails-asset-digest
 
+[![Build Status](https://travis-ci.org/davemo/grunt-rails-asset-digest.png?branch=master)](https://travis-ci.org/davemo/grunt-rails-asset-digest)
+
+
 > Generates fingerprinted assets and appends entries to a rails manifest
 
 ## Intended Use
