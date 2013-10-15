@@ -1,7 +1,7 @@
 {
   "name": "grunt-rails-asset-digest",
   "description": "Generates asset fingerprints and appends to an existing rails manifest",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "homepage": "https://github.com/davemo/grunt-rails-asset-digest",
   "author": {
     "name": "David Mosher",
