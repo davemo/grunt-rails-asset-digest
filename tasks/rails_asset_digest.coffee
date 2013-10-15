@@ -16,10 +16,16 @@ module.exports = (grunt) ->
 
   _ = grunt.util._
 
+  normalizeAssetPath = (path) ->
+    unless _.str.endsWith(path, "/")
+      path += "/"
+    path
+
   grunt.registerMultiTask "rails_asset_digest", "Generates asset fingerprints and appends to a rails manifest", ->
 
-    assetPath      = @options(assetPath: "public/assets").assetPath
+    assetPath      = @options(assetPath: "public/assets/").assetPath
     algorithm      = @options(algorithm: "md5").algorithm
+    assetPath      = normalizeAssetPath(assetPath)
 
     manifestName   = "manifest.yml"
     assetPathRegex = ///^#{assetPath}///
