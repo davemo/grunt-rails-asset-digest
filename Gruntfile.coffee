@@ -50,6 +50,9 @@ module.exports = (grunt) ->
       replaces_stale_entries:
         files: TEST_FILES
 
+      writes_contents_of_files_properly:
+        files: TEST_FILES
+
       normalizes_asset_path_to_add_trailing_slash:
         options:
           assetPath: "tmp/public/assets"
@@ -67,6 +70,9 @@ module.exports = (grunt) ->
 
       normalizes_asset_path_to_add_trailing_slash:
         ["test/normalizes_asset_path_to_add_trailing_slash_test.js"]
+
+      writes_contents_of_files_properly:
+        ["test/writes_contents_of_files_properly_test.js"]
 
   grunt.loadTasks "tasks"
 
@@ -106,11 +112,20 @@ module.exports = (grunt) ->
     "nodeunit:normalizes_asset_path_to_add_trailing_slash"
   ]
 
+  grunt.registerTask "test-writes-contents-of-files-properly", [
+    "clean"
+    "shell:create_empty_manifest"
+    "shell:add_preexisting_manifest_entries"
+    "rails_asset_digest:writes_contents_of_files_properly"
+    "nodeunit:writes_contents_of_files_properly"
+  ]
+
   grunt.registerTask "test", [
     "test-appending-to-manifest-with-existing-entries"
     "test-appending-to-manifest-with-no-entries"
     "test-replaces-stale-entries"
     "test-normalizes-asset-path-to-remove-trailing-slash"
+    "test-writes-contents-of-files-properly"
   ]
 
   grunt.registerTask "default", ["test"]

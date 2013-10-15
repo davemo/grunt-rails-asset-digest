@@ -25,11 +25,10 @@ module.exports = (grunt) ->
 
     assetPath      = @options(assetPath: "public/assets/").assetPath
     algorithm      = @options(algorithm: "md5").algorithm
-    assetPath      = normalizeAssetPath(assetPath)
 
     manifestName   = "manifest.yml"
-    assetPathRegex = ///^#{assetPath}///
-    manifestPath   = "#{assetPath}/#{manifestName}"
+    assetPathRegex = ///^#{normalizeAssetPath(assetPath)}///
+    manifestPath   = "#{normalizeAssetPath(assetPath)}#{manifestName}"
 
     stripAssetPath = (path) ->
       path.replace assetPathRegex, ''
@@ -54,7 +53,7 @@ module.exports = (grunt) ->
       if extension is ".map"
         extension = "#{path.extname(path.basename(dest, extension))}#{extension}"
 
-      content  = src
+      content  = grunt.file.read(src)
       filename = "#{path.dirname(dest)}/#{path.basename(dest, extension)}-#{algorithmHash.update(content).digest("hex")}#{extension}"
       filesToHashed[stripAssetPath dest] = stripAssetPath filename
 

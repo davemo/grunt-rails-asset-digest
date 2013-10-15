@@ -14,7 +14,7 @@ exports.asset_digest = {
 
     var actual   = grunt.file.read('tmp/public/assets/manifest.yml');
     var expected = grunt.file.read('test/expected/manifest-with-no-entries.yml');
-    test.equal(actual, expected, 'manifest entries do not contain leading slashes.');
+    test.equal(actual, expected, 'manifest entries should not contain leading slashes.');
 
     test.done();
   }
