@@ -3,20 +3,27 @@ cp    = require("child_process")
 read  = grunt.file.read
 write = grunt.file.write
 
-runGruntTasks = (tasks..., done) ->
-  cp.spawn("grunt", tasks, {stdio: 'inherit', cwd: 'spec'}).on "exit", -> done()
+runGruntTask = (task, config, done) ->
+  cp.spawn("grunt",
+    [
+      task,
+      "--config", JSON.stringify(config),
+      "--tasks", "../tasks"
+      "--gruntfile", "spec/Gruntfile.coffee"
+    ],
+    {stdio: 'inherit'}
+  ).on("exit", -> done())
 
-createWorkspace = (workspace) ->
-  cp.exec "mkdir -p #{workspace}"
+createWorkspace = (workspacePath) ->
+  cp.exec "mkdir -p #{workspacePath}"
 
-cleanWorkspace = (workspace) ->
-  cp.exec "rm -rf #{workspace}"
+cleanWorkspace = (workspaceRoot) ->
+  cp.exec "rm -rf #{workspaceRoot}"
 
-afterEach -> cleanWorkspace("spec/tmp/")
+beforeEach -> createWorkspace(@workspacePath = "spec/tmp/public/assets")
+afterEach  -> cleanWorkspace("spec/tmp/")
 
 describe "rails_asset_digest", ->
-  Given -> @workspace = "spec/tmp/public/assets"
-  Given -> createWorkspace(@workspace)
 
   describe "appends entries to an existing rails manifest", ->
     Given ->
@@ -39,7 +46,20 @@ describe "rails_asset_digest", ->
         style.css: style-7527fba956549aa7f85756bdce7183cf.css
         """
 
-    Given -> write("#{@workspace}/manifest.yml", @existingManifest)
-    Given -> @tasks = ["rails_asset_digest:appends_to_manifest_with_existing_entries"]
-    Given (done) -> runGruntTasks(@tasks, done)
-    Then  -> read("#{@workspace}/manifest.yml") == @expectedManifest
+    Given ->
+      @config =
+        rails_asset_digest:
+          sut:
+            options:
+              assetPath: "tmp/public/assets/"
+            files:
+              "tmp/public/assets/rootfile.js"                         : "../test/common_rails_project/public/assets/javascripts/rootfile.js"
+              "tmp/public/assets/sourcemapping.js.map"                : "../test/common_rails_project/public/assets/javascripts/sourcemapping.js.map"
+              "tmp/public/assets/othersubdirectory/generated-tree.js" : "../test/common_rails_project/public/assets/javascripts/othersubdirectory/generated-tree.js"
+              "tmp/public/assets/subdirectory/with/alibrary.js"       : "../test/common_rails_project/public/assets/javascripts/subdirectory/with/alibrary.js"
+              "tmp/public/assets/style.css"                           : "../test/common_rails_project/public/assets/stylesheets/style.css"
+
+    Given -> write("#{@workspacePath}/manifest.yml", @existingManifest)
+    Given (done) -> runGruntTask("rails_asset_digest", @config, done)
+    When  -> @writtenManifest = read("#{@workspacePath}/manifest.yml")
+    Then  -> @writtenManifest == @expectedManifest
