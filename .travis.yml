@@ -4,7 +4,7 @@ node_js:
   - 0.10
 
 script:
-  - "grunt test"
+  - "grunt spec:e2e"
 
 before_script:
   - npm install -g grunt-cli
