@@ -21,6 +21,9 @@ runGruntTask = (task, config, done) ->
 beforeEach -> mkdir @workspacePath = "spec/tmp/public/assets"
 afterEach  -> clear "spec/tmp/"
 
+keysShouldBeEqualIn = (written, expected) ->
+  expect(_(JSON.parse(written).files).keys().sort()).toEqual(_(expected.files).keys().sort())
+
 describe "rails_asset_digest", ->
 
   Given ->
@@ -134,7 +137,7 @@ describe "rails_asset_digest", ->
       Given -> write("#{@workspacePath}/manifest.json", JSON.stringify(@existingManifest))
       Given (done) -> runGruntTask("rails_asset_digest", @config, done)
       When  -> @writtenManifest = read("#{@workspacePath}/manifest.json")
-      Then  -> expect(JSON.parse(@writtenManifest)).toEqual(@expectedManifest)
+      Then  -> keysShouldBeEqualIn(@writtenManifest, @expectedManifest)
 
   context "a manifest with stale entries from a previous run of the grunt task", ->
 
@@ -147,7 +150,7 @@ describe "rails_asset_digest", ->
       Given -> write("#{@workspacePath}/manifest.json", JSON.stringify(@existingManifest))
       Given (done) -> runGruntTask("rails_asset_digest", @config, done)
       When  -> @writtenManifest = read("#{@workspacePath}/manifest.json")
-      Then  -> expect(JSON.parse(@writtenManifest)).toEqual(@expectedManifest)
+      Then  -> keysShouldBeEqualIn(@writtenManifest, @expectedManifest)
 
   context "an empty manifest", ->
 
@@ -160,7 +163,7 @@ describe "rails_asset_digest", ->
       Given -> write("#{@workspacePath}/manifest.json", JSON.stringify(@existingManifest))
       Given (done) -> runGruntTask("rails_asset_digest", @config, done)
       When  -> @writtenManifest = read("#{@workspacePath}/manifest.json")
-      Then  -> expect(JSON.parse(@writtenManifest)).toEqual(@expectedManifest)
+      Then  -> keysShouldBeEqualIn(@writtenManifest, @expectedManifest)
 
     describe "normalizes the asset path by adding a trailing slash", ->
 
@@ -168,7 +171,6 @@ describe "rails_asset_digest", ->
       Given -> write("#{@workspacePath}/manifest.json", JSON.stringify(@existingManifest))
       Given (done) -> runGruntTask("rails_asset_digest", @config, done)
       When  -> @writtenManifest = read("#{@workspacePath}/manifest.json")
-      Then  -> expect(JSON.parse(@writtenManifest)).toEqual(@expectedManifest)
 
   describe "writes contents of fingerprinted files properly", ->
 
