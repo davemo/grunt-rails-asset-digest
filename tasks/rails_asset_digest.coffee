@@ -31,8 +31,8 @@ module.exports = (grunt) ->
 
     assetPath      = @options(assetPath: "public/assets/").assetPath
     algorithm      = @options(algorithm: "md5").algorithm
+    manifestName   = @options(manifestName: "manifest.json").manifestName
 
-    manifestName   = "manifest.json"
     assetPathRegex = ///^#{normalizeAssetPath(assetPath)}///
     manifestPath   = "#{normalizeAssetPath(assetPath)}#{manifestName}"
 

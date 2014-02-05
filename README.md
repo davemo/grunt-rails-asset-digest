@@ -150,6 +150,12 @@ Default value: `public/assets`
 
 The location of the rails asset path
 
+#### options.manifestName
+Type: `String`
+Default value: `manifest.json`
+
+The name of the manifest file, so you can provide your own secret to prevent people guessing the name if so desired.
+
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
 
