@@ -21,9 +21,9 @@ module.exports = (grunt) ->
       path += "/"
     path
 
-  removeKeysThatStartWith = (unDigestedFilePath, ext, obj) ->
+  removeKeysThatStartWith = (filepath, ext, obj) ->
     keys = _.keys(obj)
-    actualKeysToRemove = _(keys).filter (key) -> _s.startsWith(key, unDigestedFilePath)
+    actualKeysToRemove = _(keys).filter (key) -> _s.startsWith(key, filepath)
     _(actualKeysToRemove).each (key) -> delete obj[key]
     obj
 
@@ -43,8 +43,10 @@ module.exports = (grunt) ->
       grunt.log.warn "#{manifestPath} did not exist"
       false
 
-    addedManifestEntries = {}
-    existingManifestData = JSON.parse(grunt.file.read(manifestPath))?.files
+    addedManifestFileEntries = {}
+    addedManifestAssetEntries = {}
+    existingManifestFilesData  = JSON.parse(grunt.file.read(manifestPath))?.files
+    existingManifestAssetsData = JSON.parse(grunt.file.read(manifestPath))?.assets
 
     _(@files).each (files) ->
 
@@ -63,23 +65,32 @@ module.exports = (grunt) ->
       content  = grunt.file.read(src)
       digest = algorithmHash.update(content).digest("hex")
       stats = fs.statSync(src)
-      undigestedFilename = "#{path.dirname(dest)}/#{path.basename(dest, extension)}"
+      undigestedFilename = "#{path.dirname(dest)}/#{path.basename(dest, extension)}#{extension}"
+      undigestedFilenameWithoutPrefix = "#{path.dirname(dest)}/#{path.basename(dest, extension)}"
       digestedFilename = "#{path.dirname(dest)}/#{path.basename(dest, extension)}-#{digest}#{extension}"
 
-      addedManifestEntries[stripAssetPath digestedFilename] = {
+      addedManifestFileEntries[stripAssetPath digestedFilename] = {
         mtime: new Date(stats.mtime).toISOString()
         digest: digest
         size: stats.size
         logical_path: stripAssetPath dest
       }
 
-      if existingManifestData
-        existingManifestData = removeKeysThatStartWith(stripAssetPath(undigestedFilename), extension, existingManifestData)
+      addedManifestAssetEntries[stripAssetPath undigestedFilename] = stripAssetPath digestedFilename
+
+      if existingManifestFilesData
+        existingManifestFilesData = removeKeysThatStartWith(stripAssetPath(undigestedFilenameWithoutPrefix), extension, existingManifestFilesData)
+
+      if existingManifestAssetsData
+        existingManifestAssetsData = removeKeysThatStartWith(stripAssetPath(undigestedFilenameWithoutPrefix), extension, existingManifestAssetsData)
 
       grunt.file.write digestedFilename, content
       grunt.log.writeln "File #{digestedFilename} created."
 
-    addedCount   = _.keys(addedManifestEntries).length
-    fs.writeFileSync manifestPath, JSON.stringify(_.extend({files: _.extend(addedManifestEntries, existingManifestData)}))
+    addedCount   = _.keys(addedManifestFileEntries).length
+    fs.writeFileSync manifestPath, JSON.stringify(_.extend({
+      files: _.extend(addedManifestFileEntries, existingManifestFilesData)
+      assets: _.extend(addedManifestAssetEntries, existingManifestAssetsData)
+    }))
 
-    grunt.log.writeln "Added #{addedCount} lines to #{manifestPath}, total entries #{_.keys(addedManifestEntries).length}"
+    grunt.log.writeln "Added #{addedCount} keys to #{manifestPath} (in .files and .assets), total #{_.keys(addedManifestFileEntries).length}"

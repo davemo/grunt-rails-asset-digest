@@ -127,6 +127,11 @@ And the associaated fingerprinted entries in manifest.json like so:
       "size": 17
       "logical_path": "style.css"
     }
+  },
+  "assets" : {
+    "javascript-file.js" : "javascript-file-a5a14aa0f19b8fe989f3b79fc72b9b36.js",
+    "sourcemap-file.js" : "sourcemap-file-365b31e16181703b506e90b57f95b568.js.map",
+    "style.css" : "style-1fd9137f040f2440d26da164c65e7f66.css"
   }
 }
 ```

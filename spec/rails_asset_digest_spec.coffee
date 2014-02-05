@@ -23,12 +23,17 @@ afterEach  -> clear "spec/tmp/"
 
 keysShouldBeEqualIn = (written, expected) ->
   expect(_(JSON.parse(written).files).keys().sort()).toEqual(_(expected.files).keys().sort())
+  expect(_(JSON.parse(written).assets).keys().sort()).toEqual(_(expected.assets).keys().sort())
 
 describe "rails_asset_digest", ->
 
   Given ->
     @railsManifestEntries = -> {
-      files: {
+      "assets": {
+        "entry-we-didnt-touch.js" : "entry-we-didnt-touch-536a9e5d711e0593e43360ad330ccc31.js"
+        "thing-that-existed.js" : "thing-that-existed-536a9e5ddkfjc9v9e9r939494949491.js"
+      }
+      "files": {
         "thing-that-existed-536a9e5ddkfjc9v9e9r939494949491.js" : {
           "mtime": "2014-02-05T00:52:02.649Z",
           "digest": "536a9e5ddkfjc9v9e9r939494949491"
@@ -45,7 +50,14 @@ describe "rails_asset_digest", ->
     }
 
     @taskManifestEntries = -> {
-      files: {
+      "assets": {
+        "rootfile.js" : "rootfile-54267464ea71790d3ec68e243f64b98e.js"
+        "sourcemapping.js.map" : "sourcemapping-742adbb9b78615a3c204b83965bb62f7.js.map"
+        "othersubdirectory/generated-tree.js" : "othersubdirectory/generated-tree-e4ce151e4824a9cbadf1096551b070d8.js"
+        "subdirectory/with/alibrary.js" : "subdirectory/with/alibrary-313b3b4b01cec6e4e82bdeeb258503c5.js"
+        "style.css" : "style-7527fba956549aa7f85756bdce7183cf.css"
+      }
+      "files": {
         "rootfile-54267464ea71790d3ec68e243f64b98e.js": {
           "mtime": "2014-02-04T18:14:52.000Z",
           "digest": "54267464ea71790d3ec68e243f64b98e",
@@ -80,7 +92,14 @@ describe "rails_asset_digest", ->
     }
 
     @staleManifestEntries = -> {
-      files: {
+      "assets": {
+        "rootfile.js" : "rootfile-OLDSHA.js"
+        "sourcemapping.js.map" : "sourcemapping-OLDSHA.js.map"
+        "othersubdirectory/generated-tree.js" : "othersubdirectory/generated-tree-OLDSHA.js"
+        "subdirectory/with/alibrary.js" : "subdirectory/with/alibrary-313b3b4b01cec6e4e82bdeeb258503c5.js"
+        "style.css" : "style-OLDSHA.css"
+      }
+      "files": {
         "rootfile-OLDSHA.js" : {
           "mtime": "2014-02-04T18:14:52.000Z"
           "digest": "OLDSHA"
@@ -130,7 +149,10 @@ describe "rails_asset_digest", ->
 
     Given ->
       @existingManifest = @railsManifestEntries()
-      @expectedManifest = {files: _.extend(@taskManifestEntries().files, @railsManifestEntries().files)}
+      @expectedManifest = {
+        assets: _.extend(@taskManifestEntries().assets, @railsManifestEntries().assets)
+        files: _.extend(@taskManifestEntries().files, @railsManifestEntries().files)
+      }
 
     describe "appends new manifest entries, does not touch existing rails entries", ->
 
@@ -142,8 +164,14 @@ describe "rails_asset_digest", ->
   context "a manifest with stale entries from a previous run of the grunt task", ->
 
     Given ->
-      @existingManifest = {files: _.extend(@railsManifestEntries().files, @staleManifestEntries().files)}
-      @expectedManifest = {files: _.extend(@railsManifestEntries().files, @taskManifestEntries().files)}
+      @existingManifest = {
+        assets: _.extend(@railsManifestEntries().assets, @staleManifestEntries().assets)
+        files: _.extend(@railsManifestEntries().files, @staleManifestEntries().files)
+      }
+      @expectedManifest = {
+        assets: _.extend(@railsManifestEntries().assets, @taskManifestEntries().assets)
+        files: _.extend(@railsManifestEntries().files, @taskManifestEntries().files)
+      }
 
     describe "replaces stale entries", ->
 
