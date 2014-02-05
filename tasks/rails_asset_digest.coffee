@@ -9,24 +9,30 @@
 fs     = require "fs"
 path   = require "path"
 crypto = require "crypto"
+_      = require "underscore"
+_s     = require "underscore.string"
 
 "use strict"
 
 module.exports = (grunt) ->
 
-  _ = grunt.util._
-
   normalizeAssetPath = (path) ->
-    unless _.str.endsWith(path, "/")
+    unless _s.endsWith(path, "/")
       path += "/"
     path
+
+  removeKeysThatStartWith = (unDigestedFilePath, ext, obj) ->
+    keys = _.keys(obj)
+    actualKeysToRemove = _(keys).filter (key) -> _s.startsWith(key, unDigestedFilePath)
+    _(actualKeysToRemove).each (key) -> delete obj[key]
+    obj
 
   grunt.registerMultiTask "rails_asset_digest", "Generates asset fingerprints and appends to a rails manifest", ->
 
     assetPath      = @options(assetPath: "public/assets/").assetPath
     algorithm      = @options(algorithm: "md5").algorithm
 
-    manifestName   = "manifest.yml"
+    manifestName   = "manifest.json"
     assetPathRegex = ///^#{normalizeAssetPath(assetPath)}///
     manifestPath   = "#{normalizeAssetPath(assetPath)}#{manifestName}"
 
@@ -37,7 +43,8 @@ module.exports = (grunt) ->
       grunt.log.warn "#{manifestPath} did not exist"
       false
 
-    filesToHashed = {}
+    addedManifestEntries = {}
+    existingManifestData = JSON.parse(grunt.file.read(manifestPath))?.files
 
     _(@files).each (files) ->
 
@@ -54,36 +61,25 @@ module.exports = (grunt) ->
         extension = "#{path.extname(path.basename(dest, extension))}#{extension}"
 
       content  = grunt.file.read(src)
-      filename = "#{path.dirname(dest)}/#{path.basename(dest, extension)}-#{algorithmHash.update(content).digest("hex")}#{extension}"
-      filesToHashed[stripAssetPath dest] = stripAssetPath filename
+      digest = algorithmHash.update(content).digest("hex")
+      stats = fs.statSync(src)
+      undigestedFilename = "#{path.dirname(dest)}/#{path.basename(dest, extension)}"
+      digestedFilename = "#{path.dirname(dest)}/#{path.basename(dest, extension)}-#{digest}#{extension}"
 
-      grunt.file.write filename, content
-      grunt.log.writeln "File #{filename} created."
+      addedManifestEntries[stripAssetPath digestedFilename] = {
+        mtime: new Date(stats.mtime).toISOString()
+        digest: digest
+        size: stats.size
+        logical_path: stripAssetPath dest
+      }
 
-    manifestDataLines = grunt.file.read(manifestPath).split "\n"
-    replaceCount      = 0
-    filesMatched      = {} # to prevent duplicate files
+      if existingManifestData
+        existingManifestData = removeKeysThatStartWith(stripAssetPath(undigestedFilename), extension, existingManifestData)
 
-    manifestDataLines = _(manifestDataLines).map (line) ->
-      match = line.match /^(\S+?):/
-      file  = match?[1]
-      if match and filesToHashed[file]
-        if filesMatched[file]
-          # Already seen this file in the manifest
-          return null
-        else
-          line = "#{file}: #{filesToHashed[file]}"
-          filesMatched[file] = true
-          replaceCount++
-      return line
+      grunt.file.write digestedFilename, content
+      grunt.log.writeln "File #{digestedFilename} created."
 
-    _(filesMatched).each (__, file) ->
-      delete filesToHashed[file]
+    addedCount   = _.keys(addedManifestEntries).length
+    fs.writeFileSync manifestPath, JSON.stringify(_.extend({files: _.extend(addedManifestEntries, existingManifestData)}))
 
-    _(filesToHashed).each (hashed, file) ->
-      manifestDataLines.push "#{file}: #{hashed}"
-
-    manifestData = _(manifestDataLines).compact().join("\n")
-
-    fs.writeFileSync manifestPath, manifestData
-    grunt.log.writeln "Replaced #{replaceCount} lines and appended #{_(filesToHashed).size()} lines to #{manifestPath}"
+    grunt.log.writeln "Added #{addedCount} lines to #{manifestPath}, total entries #{_.keys(addedManifestEntries).length}"
