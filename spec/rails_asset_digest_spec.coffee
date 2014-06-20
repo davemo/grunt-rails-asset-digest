@@ -32,6 +32,7 @@ describe "rails_asset_digest", ->
       "assets": {
         "entry-we-didnt-touch.js" : "entry-we-didnt-touch-536a9e5d711e0593e43360ad330ccc31.js"
         "thing-that-existed.js" : "thing-that-existed-536a9e5ddkfjc9v9e9r939494949491.js"
+        "style/style-should-stay.css" : "style-should-stay-OLDSHA.css"
       }
       "files": {
         "thing-that-existed-536a9e5ddkfjc9v9e9r939494949491.js" : {
@@ -45,6 +46,12 @@ describe "rails_asset_digest", ->
           "digest": "536a9e5d711e0593e43360ad330ccc31",
           "size": 32,
           "logical_path": "entry-we-didnt-touch.js"
+        }
+        "style/style-should-stay-OLDSHA.css" : {
+          "mtime": "2014-02-04T18:14:52.000Z"
+          "digest": "OLDSHA"
+          "size": 32
+          "logical_path": "style/style-should-stay.css"
         }
       }
     }
@@ -98,6 +105,7 @@ describe "rails_asset_digest", ->
         "othersubdirectory/generated-tree.js" : "othersubdirectory/generated-tree-OLDSHA.js"
         "subdirectory/with/alibrary.js" : "subdirectory/with/alibrary-313b3b4b01cec6e4e82bdeeb258503c5.js"
         "style.css" : "style-OLDSHA.css"
+        "style/style-should-stay.css" : "style-should-stay-OLDSHA.css"
       }
       "files": {
         "rootfile-OLDSHA.js" : {
@@ -129,6 +137,12 @@ describe "rails_asset_digest", ->
           "digest": "OLDSHA"
           "size": 32
           "logical_path": "style.css"
+        }
+        "style/style-should-stay-OLDSHA.css" : {
+          "mtime": "2014-02-04T18:14:52.000Z"
+          "digest": "OLDSHA"
+          "size": 32
+          "logical_path": "style/style-should-stay.css"
         }
       }
     }
