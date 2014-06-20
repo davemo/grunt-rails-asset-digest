@@ -21,9 +21,9 @@ module.exports = (grunt) ->
       path += "/"
     path
 
-  removeKeysThatStartWith = (filepath, ext, obj) ->
+  removeOldKeys = (filepath, obj) ->
     keys = _.keys(obj)
-    actualKeysToRemove = _(keys).filter (key) -> _s.startsWith(key, filepath)
+    actualKeysToRemove = _(keys).filter (key) -> obj[key].logical_path == filepath
     _(actualKeysToRemove).each (key) -> delete obj[key]
     obj
 
@@ -66,7 +66,6 @@ module.exports = (grunt) ->
       digest = algorithmHash.update(content).digest("hex")
       stats = fs.statSync(src)
       undigestedFilename = "#{path.dirname(dest)}/#{path.basename(dest, extension)}#{extension}"
-      undigestedFilenameWithoutPrefix = "#{path.dirname(dest)}/#{path.basename(dest, extension)}"
       digestedFilename = "#{path.dirname(dest)}/#{path.basename(dest, extension)}-#{digest}#{extension}"
 
       addedManifestFileEntries[stripAssetPath digestedFilename] = {
@@ -79,10 +78,10 @@ module.exports = (grunt) ->
       addedManifestAssetEntries[stripAssetPath undigestedFilename] = stripAssetPath digestedFilename
 
       if existingManifestFilesData
-        existingManifestFilesData = removeKeysThatStartWith(stripAssetPath(undigestedFilenameWithoutPrefix), extension, existingManifestFilesData)
+        existingManifestFilesData = removeOldKeys(stripAssetPath(undigestedFilename), existingManifestFilesData)
 
       if existingManifestAssetsData
-        existingManifestAssetsData = removeKeysThatStartWith(stripAssetPath(undigestedFilenameWithoutPrefix), extension, existingManifestAssetsData)
+        existingManifestAssetsData = removeOldKeys(stripAssetPath(undigestedFilename), existingManifestAssetsData)
 
       grunt.file.write digestedFilename, content
       grunt.log.writeln "File #{digestedFilename} created."
