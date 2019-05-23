@@ -124,7 +124,7 @@ And the associaated fingerprinted entries in manifest.json like so:
     "style-1fd9137f040f2440d26da164c65e7f66.css" : {
       "mtime": "2014-02-04T18:14:52.0",
       "digest": "1fd9137f040f2440d26da164c65e7f66",
-      "size": 17
+      "size": 17,
       "logical_path": "style.css"
     }
   },
