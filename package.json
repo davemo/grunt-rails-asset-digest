@@ -43,6 +43,6 @@
   ],
   "dependencies": {
     "underscore": "~1.5.2",
-    "underscore.string": "~2.3.3"
+    "underscore.string": "~3.3.5"
   }
 }
