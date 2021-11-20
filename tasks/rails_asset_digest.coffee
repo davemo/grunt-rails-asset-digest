@@ -9,22 +9,20 @@
 fs     = require "fs"
 path   = require "path"
 crypto = require "crypto"
-_      = require "underscore"
-_s     = require "underscore.string"
 
 "use strict"
 
 module.exports = (grunt) ->
 
   normalizeAssetPath = (path) ->
-    unless _s.endsWith(path, "/")
+    unless path.endsWith("/")
       path += "/"
     path
 
   removeOldKeys = (filepath, obj) ->
-    keys = _.keys(obj)
-    actualKeysToRemove = _(keys).filter (key) -> obj[key].logical_path == filepath
-    _(actualKeysToRemove).each (key) -> delete obj[key]
+    keys = Object.keys(obj)
+    actualKeysToRemove = keys.filter (key) -> obj[key].logical_path == filepath
+    actualKeysToRemove.forEach (key) -> delete obj[key]
     obj
 
   grunt.registerMultiTask "rails_asset_digest", "Generates asset fingerprints and appends to a rails manifest", ->
@@ -48,7 +46,7 @@ module.exports = (grunt) ->
     existingManifestFilesData  = JSON.parse(grunt.file.read(manifestPath))?.files
     existingManifestAssetsData = JSON.parse(grunt.file.read(manifestPath))?.assets
 
-    _(@files).each (files) ->
+    @files.forEach (files) ->
 
       src = files.src[0]
       dest = files.dest
@@ -86,10 +84,10 @@ module.exports = (grunt) ->
       grunt.file.write digestedFilename, content
       grunt.log.writeln "File #{digestedFilename} created."
 
-    addedCount   = _.keys(addedManifestFileEntries).length
-    fs.writeFileSync manifestPath, JSON.stringify(_.extend({
-      files: _.extend(addedManifestFileEntries, existingManifestFilesData)
-      assets: _.extend(addedManifestAssetEntries, existingManifestAssetsData)
-    }))
+    addedCount   = Object.keys(addedManifestFileEntries).length
+    fs.writeFileSync manifestPath, JSON.stringify({
+      files: { ...addedManifestFileEntries, ...existingManifestFilesData }
+      assets: { ...addedManifestAssetEntries, ...existingManifestAssetsData }
+    })
 
-    grunt.log.writeln "Added #{addedCount} keys to #{manifestPath} (in .files and .assets), total #{_.keys(addedManifestFileEntries).length}"
+    grunt.log.writeln "Added #{addedCount} keys to #{manifestPath} (in .files and .assets), total #{Object.keys(addedManifestFileEntries).length}"

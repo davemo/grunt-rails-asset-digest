@@ -5,15 +5,12 @@ write  = grunt.file.write
 mkdir  = grunt.file.mkdir
 clear  = grunt.file.delete
 expand = grunt.file.expand
-_      = require("underscore")
 
-runGruntTask = (task, config, done) ->
+runGruntTask = (scenario, done) ->
   spawn("grunt",
     [
-      task,
-      "--config", JSON.stringify(config),
-      "--tasks", "../tasks"
-      "--gruntfile", "spec/Gruntfile.coffee"
+      "rails_asset_digest",
+      "--gruntfile", "spec/Gruntfile.#{scenario}.coffee"
     ],
     {stdio: 'inherit'}
   ).on("exit", -> done())
@@ -22,8 +19,8 @@ beforeEach -> mkdir @workspacePath = "spec/tmp/public/assets"
 afterEach  -> clear "spec/tmp/"
 
 keysShouldBeEqualIn = (written, expected) ->
-  expect(_(JSON.parse(written).files).keys().sort()).toEqual(_(expected.files).keys().sort())
-  expect(_(JSON.parse(written).assets).keys().sort()).toEqual(_(expected.assets).keys().sort())
+  expect(Object.keys(JSON.parse(written).files).sort()).toEqual(Object.keys(expected.files).sort())
+  expect(Object.keys(JSON.parse(written).assets).sort()).toEqual(Object.keys(expected.assets).sort())
 
 describe "rails_asset_digest", ->
 
@@ -147,31 +144,20 @@ describe "rails_asset_digest", ->
       }
     }
 
-    @config =
-      rails_asset_digest:
-        sut:
-          options:
-            assetPath: "tmp/public/assets/"
-          files:
-            "tmp/public/assets/rootfile.js"                         : "common_rails_project/public/assets/javascripts/rootfile.js"
-            "tmp/public/assets/sourcemapping.js.map"                : "common_rails_project/public/assets/javascripts/sourcemapping.js.map"
-            "tmp/public/assets/othersubdirectory/generated-tree.js" : "common_rails_project/public/assets/javascripts/othersubdirectory/generated-tree.js"
-            "tmp/public/assets/subdirectory/with/alibrary.js"       : "common_rails_project/public/assets/javascripts/subdirectory/with/alibrary.js"
-            "tmp/public/assets/style.css"                           : "common_rails_project/public/assets/stylesheets/style.css"
-
   context "a manifest with rails asset pipeline generated entries", ->
 
     Given ->
       @existingManifest = @railsManifestEntries()
+
       @expectedManifest = {
-        assets: _.extend(@taskManifestEntries().assets, @railsManifestEntries().assets)
-        files: _.extend(@taskManifestEntries().files, @railsManifestEntries().files)
+        assets: Object.assign(@taskManifestEntries().assets, @railsManifestEntries().assets)
+        files: Object.assign(@taskManifestEntries().files, @railsManifestEntries().files)
       }
 
     describe "appends new manifest entries, does not touch existing rails entries", ->
 
       Given -> write("#{@workspacePath}/manifest.json", JSON.stringify(@existingManifest))
-      Given (done) -> runGruntTask("rails_asset_digest", @config, done)
+      Given (done) -> runGruntTask("basic", done)
       When  -> @writtenManifest = read("#{@workspacePath}/manifest.json")
       Then  -> keysShouldBeEqualIn(@writtenManifest, @expectedManifest)
 
@@ -179,18 +165,18 @@ describe "rails_asset_digest", ->
 
     Given ->
       @existingManifest = {
-        assets: _.extend(@railsManifestEntries().assets, @staleManifestEntries().assets)
-        files: _.extend(@railsManifestEntries().files, @staleManifestEntries().files)
+        assets: Object.assign(@railsManifestEntries().assets, @staleManifestEntries().assets)
+        files: Object.assign(@railsManifestEntries().files, @staleManifestEntries().files)
       }
       @expectedManifest = {
-        assets: _.extend(@railsManifestEntries().assets, @taskManifestEntries().assets)
-        files: _.extend(@railsManifestEntries().files, @taskManifestEntries().files)
+        assets: Object.assign(@railsManifestEntries().assets, @taskManifestEntries().assets)
+        files: Object.assign(@railsManifestEntries().files, @taskManifestEntries().files)
       }
 
     describe "replaces stale entries", ->
 
       Given -> write("#{@workspacePath}/manifest.json", JSON.stringify(@existingManifest))
-      Given (done) -> runGruntTask("rails_asset_digest", @config, done)
+      Given (done) -> runGruntTask("basic", done)
       When  -> @writtenManifest = read("#{@workspacePath}/manifest.json")
       Then  -> keysShouldBeEqualIn(@writtenManifest, @expectedManifest)
 
@@ -203,22 +189,21 @@ describe "rails_asset_digest", ->
     describe "appends new entries", ->
 
       Given -> write("#{@workspacePath}/manifest.json", JSON.stringify(@existingManifest))
-      Given (done) -> runGruntTask("rails_asset_digest", @config, done)
+      Given (done) -> runGruntTask("basic", done)
       When  -> @writtenManifest = read("#{@workspacePath}/manifest.json")
       Then  -> keysShouldBeEqualIn(@writtenManifest, @expectedManifest)
 
     describe "normalizes the asset path by adding a trailing slash", ->
 
-      Given -> @config.rails_asset_digest.sut.options.assetPath = "tmp/public/assets"
       Given -> write("#{@workspacePath}/manifest.json", JSON.stringify(@existingManifest))
-      Given (done) -> runGruntTask("rails_asset_digest", @config, done)
+      Given (done) -> runGruntTask("assetPath", done)
       When  -> @writtenManifest = read("#{@workspacePath}/manifest.json")
 
   describe "writes contents of fingerprinted files properly", ->
 
     Given -> @existingManifest = {}
     Given -> write("#{@workspacePath}/manifest.json", JSON.stringify(@existingManifest))
-    Given (done) -> runGruntTask("rails_asset_digest", @config, done)
+    Given (done) -> runGruntTask("basic", done)
     Then  -> read("#{expand('spec/tmp/public/assets/rootfile-*.js')[0]}") == read("spec/common_rails_project/public/assets/javascripts/rootfile.js")
     And   -> read("#{expand('spec/tmp/public/assets/sourcemapping-*.js.map')[0]}") == read("spec/common_rails_project/public/assets/javascripts/sourcemapping.js.map")
     And   -> read("#{expand('spec/tmp/public/assets/style-*.css')[0]}") == read("spec/common_rails_project/public/assets/stylesheets/style.css")

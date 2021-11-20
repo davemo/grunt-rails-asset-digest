@@ -20,19 +20,17 @@
       "url": "https://github.com/davemo/grunt-rails-asset-digest/blob/master/LICENSE-MIT"
     }
   ],
-  "main": "Gruntfile.js",
+  "main": "Gruntfile.coffee",
   "engines": {
-    "node": ">= 0.8.0"
+    "node": ">= 14"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt spec"
   },
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-jasmine-bundle": "0.0.2"
-  },
-  "peerDependencies": {
-    "grunt": "~0.4.1"
+    "coffeescript": "^2.6.1",
+    "grunt": "^1.4.1",
+    "grunt-jasmine-bundle": "^0.4.0"
   },
   "keywords": [
     "gruntplugin",
@@ -40,9 +38,5 @@
     "assets",
     "fingerprinting",
     "manifest"
-  ],
-  "dependencies": {
-    "underscore": "~1.5.2",
-    "underscore.string": "~3.3.5"
-  }
+  ]
 }
