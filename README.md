@@ -4,7 +4,7 @@
 
 ## Rails Version Support
 
-Rails 4 significantly changed how the asset manifest is generated. As such if you are still on Rails 3.2 (using manifest.yml) you should use `v0.3.2` of this plugin `npm install grunt-rails-asset-digest@0.3.2 --save`; `v1.4.0` tracks support for Rails 4 and above.
+Rails 4 significantly changed how the asset manifest is generated. As such if you are still on Rails 3.2 (using manifest.yml) you should use `v0.3.2` of this plugin `npm install grunt-rails-asset-digest@0.3.2 --save`; `v1.4.1` tracks support for Rails 4 and above.
 
 > Generates fingerprinted assets and appends entries to a sprockets-rails manifest.json
 
@@ -168,7 +168,7 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 
 ## Release History
 
- * 2021-11-19   v1.4.0   update deps for grunt 1.4.0 + refactor tests
+ * 2021-11-19   v1.4.1   update deps for grunt 1.4.0 + refactor tests
  * 2014-02-05   v0.4.0   support rails 4 + sprockets-rails manifest.json format
  * 2014-02-04   v0.3.2   no-op: align version number with supported rails version
  * 2013-10-15   v0.2.0   bugfix: asserts the output of written files actually exist
