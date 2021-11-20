@@ -1,7 +1,6 @@
 # grunt-rails-asset-digest
 
-[![Build Status](https://travis-ci.org/davemo/grunt-rails-asset-digest.png?branch=master)](https://travis-ci.org/davemo/grunt-rails-asset-digest)
-
+[![Node.js CI](https://github.com/davemo/grunt-rails-asset-digest/actions/workflows/node.js.yml/badge.svg?branch=main)](https://github.com/davemo/grunt-rails-asset-digest/actions/workflows/node.js.yml)
 
 ## Rails Version Support
 
